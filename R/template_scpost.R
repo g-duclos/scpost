@@ -69,10 +69,10 @@ template_scpost <- function(
 	cells <- dataset$ID[which(dataset$Cell_Filter == "Cell")]
 	#
 	cat("Select Genes", "\n")
-	genes <- fData(dataset)$Ensembl[which(fData(dataset)$Gene_Filter == "Expressed")]
+	genes <- Biobase::fData(dataset)$Ensembl[which(fData(dataset)$Gene_Filter == "Expressed")]
 
 	#
-	seurat.obj <- scpost_seurat_init(
+	seurat.obj <- scpost::scpost_seurat_init(
     	counts=Biobase::exprs(dataset)[genes, cells],
     	pc_max=param.list[["pc_max"]],
     	verbose=verbose)
@@ -84,10 +84,10 @@ template_scpost <- function(
 	#
 	if (param.list[["batch_var"]] != FALSE & reduction == "harmony") {
 		#
-		batch_metadata <- pData(dataset)[colnames(seurat.obj), param.list[["batch_var"]]]
+		batch_metadata <- Biobase::pData(dataset)[colnames(seurat.obj), param.list[["batch_var"]]]
 		names(batch_metadata) <- colnames(seurat.obj)
 		#
-		seurat.obj <- scpost_batch_correction(
+		seurat.obj <- scpost::scpost_batch_correction(
     		seurat.obj=seurat.obj,
     		batch_metadata=batch_metadata,
     		method=reduction,
@@ -104,7 +104,7 @@ template_scpost <- function(
 		#
 		cat(paste("Run Seurat Clustering - Resolution:", res), "\n")
 		#
-		seurat.obj <- scpost_seurat_cluster(
+		seurat.obj <- scpost::scpost_seurat_cluster(
 	    	seurat.obj=seurat.obj,
 	    	pc_max=param.list[["pc_max"]],
 	    	resolution=res,
@@ -129,14 +129,10 @@ template_scpost <- function(
 
 
     #
-    pdata.out <- pData(dataset)[,c("Sample", "Cell_Filter", grep("Seurat_Clusters_Res-", colnames(pData(dataset)), value=TRUE))]
+    pdata.out <- Biobase::pData(dataset)[,c("Sample", "Cell_Filter", grep("Seurat_Clusters_Res-", colnames(Biobase::pData(dataset)), value=TRUE))]
 	#
 	saveRDS(pdata.out, file.path(file.path(dir_output, dir_analysis), "MetaData_Seurat_Clusters.rds"))
-	#
 
-#
-#umap <- TRUE
-#iterations <- 1
 	
 	#
 	if (param.list[["umap"]] == TRUE) {
