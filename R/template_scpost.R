@@ -55,7 +55,7 @@ template_scpost <- function(
 
 	#
 	cat("Store Parameters in ExpressionSet assayData Params", "\n")
-	assayData(dataset)$Params["scpost_Parameters"] <- list(param.list)
+	Biobase::assayData(dataset)$Params["scpost_Parameters"] <- list(param.list)
 
 	# Set 'reduction' to 'pca' to no batch correction
 	if (param.list[["batch_correction_method"]] == FALSE) {
@@ -77,7 +77,7 @@ template_scpost <- function(
     	pc_max=param.list[["pc_max"]],
     	verbose=verbose)
 	#
-	assayData(dataset)$Seurat["PCA"] <- list(Seurat::Embeddings(seurat.obj, 'pca'))
+	Biobase::assayData(dataset)$Seurat["PCA"] <- list(Seurat::Embeddings(seurat.obj, 'pca'))
 	#
 	saveRDS(Seurat::Embeddings(seurat.obj, 'pca'), file.path(file.path(dir_output, dir_analysis), "PCA.rds"))
 
@@ -94,7 +94,7 @@ template_scpost <- function(
     		pc_max=param.list[["pc_max"]],
     		verbose=verbose)
 		#
-		assayData(dataset)$Seurat["PCA_Harmony"] <- list(Seurat::Embeddings(seurat.obj, 'harmony'))
+		Biobase::assayData(dataset)$Seurat["PCA_Harmony"] <- list(Seurat::Embeddings(seurat.obj, 'harmony'))
 		#
 		saveRDS(Seurat::Embeddings(seurat.obj, 'harmony'), file.path(file.path(dir_output, dir_analysis), "PCA_Harmony.rds"))
 	}
@@ -115,7 +115,7 @@ template_scpost <- function(
 	    clusters <- as.numeric(Seurat::Idents(seurat.obj))
 	    names(clusters) <- colnames(seurat.obj)
         # Store numbers of clusters per resolution value
-		assayData(dataset)$Seurat[["Analysis"]][paste("Seurat_Res-", res, "_Clusters", sep="")] <- list(length(unique(clusters)))
+		Biobase::assayData(dataset)$Seurat[["Analysis"]][paste("Seurat_Res-", res, "_Clusters", sep="")] <- list(length(unique(clusters)))
 	    #
 	   	not.clusters <- rep(NA, length(setdiff(dataset$ID, names(clusters))))
 	   	names(not.clusters) <- setdiff(dataset$ID, names(clusters))
@@ -143,16 +143,16 @@ template_scpost <- function(
 		for (iter in 1:param.list[["iterations"]]) {
 			#
     		cat(paste("Run UMAP - Iteration:", iter), "\n")
-			set.seed(assayData(dataset)$Params[["Seeds"]][iter])
+			set.seed(Biobase::assayData(dataset)$Params[["Seeds"]][iter])
         	seurat.obj <- suppressWarnings(Seurat::RunUMAP(
 	    	    object=seurat.obj,
 	    	    reduction=reduction,
 	    	    dims=1:param.list[["pc_max"]],
-	    	    seed.use=assayData(dataset)$Params[["Seeds"]][iter],
+	    	    seed.use=Biobase::assayData(dataset)$Params[["Seeds"]][iter],
 	    	    verbose=verbose))
 
 			# Store dimred output in ESet
-	    	assayData(dataset)$Seurat[["UMAP"]][paste("Iteration_", iter, sep="")] <- list(seurat.obj$umap@cell.embeddings)
+	    	Biobase::assayData(dataset)$Seurat[["UMAP"]][paste("Iteration_", iter, sep="")] <- list(seurat.obj$umap@cell.embeddings)
 			# Save dimred output as .rds file
 			saveRDS(seurat.obj$umap@cell.embeddings, file.path(file.path(file.path(dir_output, dir_analysis), dir_umap), paste("UMAP_Iteration_", iter, ".rds", sep="")))
 		}
@@ -173,14 +173,14 @@ template_scpost <- function(
 	    	    object=seurat.obj,
 	    	    reduction=reduction,
 	    	    dims=1:param.list[["pc_max"]],
-	    	    seed.use=assayData(dataset)$Params[["Seeds"]][iter],
+	    	    seed.use=Biobase::assayData(dataset)$Params[["Seeds"]][iter],
 	    	   	nthreads=threads,
 		        max_iter=2000,
 		        check_duplicates=FALSE,
 	    	    verbose=verbose))
 
 			# Store dimred output in ESet
-	    	assayData(dataset)$Seurat[["tSNE"]][paste("Iteration_", iter, sep="")] <- list(seurat.obj$tsne@cell.embeddings)
+	    	Biobase::assayData(dataset)$Seurat[["tSNE"]][paste("Iteration_", iter, sep="")] <- list(seurat.obj$tsne@cell.embeddings)
 			# Save dimred output as .rds file
 			saveRDS(seurat.obj$tsne@cell.embeddings, file.path(file.path(file.path(dir_output, dir_analysis), dir_tsne), paste("tSNE_Iteration_", iter, ".rds", sep="")))
 		}
