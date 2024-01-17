@@ -28,7 +28,7 @@ scpost_seurat_init <- function(
                 scale.factor = 10000,
                 verbose = verbose)
     #    
-    if (verbose == TRUE) { cat("   Seurat - Scale", "\n") }
+    if (verbose == TRUE) { cat("   Seurat - Find Variable Features", "\n") }
     seurat.obj <- Seurat::FindVariableFeatures(seurat.obj,
                 selection.method = "vst",
                 nfeatures = 2000,
@@ -49,3 +49,16 @@ scpost_seurat_init <- function(
     return(seurat.obj)
     #
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

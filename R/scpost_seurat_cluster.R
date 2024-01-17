@@ -40,6 +40,6 @@ scpost_seurat_cluster <- function(
     if (seurat_return == TRUE) {
         return(seurat.obj)
     } else {
-        return(Idents(seurat.obj))
+        return(Seurat::Idents(seurat.obj))
     }
 }
