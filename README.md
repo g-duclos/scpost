@@ -117,9 +117,11 @@ seurat.obj <- scpost::scpost_seurat_cluster(
 
 <details>
 	<summary>
-	The Seurat *RunTSNE* function is used to run t-SNE on the dataset and results are stored as a list labeled "tSNE" in the "assayData" slot labeled "Seurat" in the ExpressionSet object.
+	The Seurat *RunTSNE* function is used to run t-SNE on the dataset.
 	</summary>
 	<ul><li>
+		tSNE results are stored as a list labeled "tSNE" in the "assayData" slot labeled "Seurat" in the ExpressionSet object.
+	<li>
 		tSNE results will reflect the decision to use or not use one of the specified batch correction methods
 	</li>
 	<li>
@@ -132,9 +134,14 @@ seurat.obj <- scpost::scpost_seurat_cluster(
 </details>
 
 
-<li>
-	The Seurat *RunUMAP* function is used to run UMAP on the dataset and results are stored as a list labeled "UMAP" in the "assayData" slot labeled "Seurat" in the ExpressionSet object.
+<details>
+	<summary>
+		The Seurat *RunUMAP* function is used to run UMAP on the dataset and results/
+	</summary>
 	<ul><li>
+		UMAP results are stored as a list labeled "UMAP" in the "assayData" slot labeled "Seurat" in the ExpressionSet object.
+	</li>
+	<li>
 		UMAP results will reflect the decision to use or not use one of the specified batch correction methods
 	</li>
 	<li>
@@ -143,7 +150,8 @@ seurat.obj <- scpost::scpost_seurat_cluster(
 	<li>
 		According to the number of iterations specified in the "scpost_parameters.csv" file, results are saved in a subdirectory named "scpost_analysis" in *dir_output* in the RDS format as "UMAP_Iteration_1.rds", "UMAP_Iteration_2.rds", ...
 	</li>
-</ul>
+	</ul>
+</details>
 
 
 <li>
