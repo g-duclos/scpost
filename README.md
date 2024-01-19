@@ -55,9 +55,12 @@ Core functions include:
 <pre>
 # Select high quality cells
 cells <- dataset$ID[which(dataset$Cell_Filter == "Cell")]
-<li># Select genes with minimum expression requirements
+</pre>
+<pre>
+# Select genes with minimum expression requirements
 genes <- Biobase::fData(dataset)$Ensembl[which(fData(dataset)$Gene_Filter == "Expressed")]
-<li>
+</pre>
+<pre>
 # Build Seurat object, normalize, select HVG, scale, & PCA
 seurat.obj <- scpost::scpost_seurat_init(
     counts=counts[genes, cells],
