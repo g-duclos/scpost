@@ -51,7 +51,8 @@ dataset <- scpost::template_scpost(dir_output=dir_output)
 Core functions include:
 
 <details>
-	<summary>A single command to add GEX counts data to a Seurat object, then perform standard normalization (natural log counts per ten thousand), select the top 2000 highly variable genes, scale and center the normalized data, and perform principal component analysis (PCA).</summary>
+	<summary>
+	A single command to add GEX counts data to a Seurat object, then perform standard normalization (natural log counts per ten thousand), select the top 2000 highly variable genes, scale and center the normalized data, and perform principal component analysis (PCA).</summary>
 <pre>
 # Select high quality cells
 cells <- dataset$ID[which(dataset$Cell_Filter == "Cell")]
@@ -70,14 +71,18 @@ seurat.obj <- scpost::scpost_seurat_init(
 </details>
 
 
-* Data integration intended to correct for technical batch effects for downstream clustering & dimensionality reduction, based on a selected "batch" variable of interest using one of the following methods:
+<details>
+	<summary>
+	Data integration intended to correct for technical batch effects for downstream clustering & dimensionality reduction, based on a selected "batch" variable of interest using one of the following methods:
 	* ["Harmony" R package](https://github.com/immunogenomics/harmony)
 	* [Seurat's "RPCA" method](https://satijalab.org/seurat/articles/integration_rpca.html)
-```
+	</summary>
+<pre>
 # Select batch metadata according to metadata variable of interest
 batch_metadata <- Biobase::pData(dataset)[colnames(seurat.obj), batch_var]
 names(batch_metadata) <- colnames(seurat.obj)
-
+</pre>
+<pre>
 # Perform batch correction with "harmony" or "rpca" method
 seurat.obj <- scpost::scpost_batch_correction(
    	seurat.obj=seurat.obj,
@@ -85,7 +90,8 @@ seurat.obj <- scpost::scpost_batch_correction(
     method=reduction,
     pc_max=pc_max,
     verbose=verbose)
-```
+</pre>
+</details>
 
 * A single command to perform unsupervised cell clustering using Seurat's standard methodology (SNN & Louvain community detection) with the option of returning a range of cluster solutions.
 ```
