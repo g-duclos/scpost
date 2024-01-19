@@ -150,13 +150,13 @@ seurat.obj <- scpost::scpost_seurat_cluster(
 
 
 <li>
-	Pseudobulk differential expression functionalities, involving the use of the ["DESeq2" R package](https://bioconductor.org/packages/release/bioc/html/DESeq2.html) are a work in progress...
+	Pseudobulk differential expression functionalities, involving the use of the <a href="https://bioconductor.org/packages/release/bioc/html/DESeq2.html">DESeq2 R package</a> are a work in progress...
 </li>
 <br>
 
 
 <li>
-	Functional annotation, involving the use of gene set databases, including <a href="https://www.gsea-msigdb.org/gsea/msigdb/">the Molecular Signatures Database (MSigDB)</a> and <a href="https://geneontology.org">Gene Ontology (GO</a>, with the <a href="https://bioconductor.org/packages/release/bioc/html/fgsea.html">Fast Gene Set Enrichment analysis (fgsea) R package</a> and the <a href="https://cran.r-project.org/web/packages/enrichR/index.html">enrichR R package</a>
+	Functional annotation, involving the use of gene set databases, including <a href="https://www.gsea-msigdb.org/gsea/msigdb/">the Molecular Signatures Database (MSigDB)</a> and <a href="https://geneontology.org">Gene Ontology (GO</a>, with methods, including the <a href="https://bioconductor.org/packages/release/bioc/html/fgsea.html">Fast Gene Set Enrichment analysis (fgsea) R package</a> and the <a href="https://cran.r-project.org/web/packages/enrichR/index.html">enrichR R package</a>
 </li>
 <br>
 
