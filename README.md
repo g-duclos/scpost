@@ -112,6 +112,8 @@ seurat.obj <- scpost::scpost_seurat_cluster(
 	seurat_return=TRUE,
 	verbose=verbose)
 </pre>
+</details>
+
 
 * The Seurat *RunTSNE* function is used to run t-SNE on the dataset and results are stored as a list labeled "tSNE" in the "assayData" slot labeled "Seurat" in the ExpressionSet object.
 	* tSNE results will reflect the decision to use or not use one of the specified batch correction methods
