@@ -48,7 +48,7 @@ library(Biobase)
 dataset <- scpost::template_scpost(dir_output=dir_output)
 ```
 
-Core functions include:
+**Core functions include:**
 
 <details>
 	<summary>
