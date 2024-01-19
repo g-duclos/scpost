@@ -115,7 +115,8 @@ seurat.obj <- scpost::scpost_seurat_cluster(
 </details>
 
 
-<li>The Seurat *RunTSNE* function is used to run t-SNE on the dataset and results are stored as a list labeled "tSNE" in the "assayData" slot labeled "Seurat" in the ExpressionSet object.
+<li>
+	The Seurat *RunTSNE* function is used to run t-SNE on the dataset and results are stored as a list labeled "tSNE" in the "assayData" slot labeled "Seurat" in the ExpressionSet object.
 	<ul><li>
 		tSNE results will reflect the decision to use or not use one of the specified batch correction methods
 	</li>
@@ -126,19 +127,45 @@ seurat.obj <- scpost::scpost_seurat_cluster(
 		According to the number of iterations specified in the "scpost_parameters.csv" file, results are saved in a subdirectory named "scpost_analysis" in *dir_output* in the RDS format as "tSNE_Iteration_1.rds", "tSNE_Iteration_2.rds", ...
 	</li>
 
-* The Seurat *RunUMAP* function is used to run UMAP on the dataset and results are stored as a list labeled "UMAP" in the "assayData" slot labeled "Seurat" in the ExpressionSet object.
-	* UMAP results will reflect the decision to use or not use one of the specified batch correction methods
-	* According to the number of iterations specified in the "scpost_parameters.csv" file, results are subsequently stored as "Iteration_1", "Iteration_2", ...
-	* According to the number of iterations specified in the "scpost_parameters.csv" file, results are saved in a subdirectory named "scpost_analysis" in *dir_output* in the RDS format as "UMAP_Iteration_1.rds", "UMAP_Iteration_2.rds", ...
 
-* Store parameters specified in the scpost_parameters.csv file in a list labeled "Parameters" in the "assayData" slot labeled "Params" in the ExpressionSet object
+<li>
+	The Seurat *RunUMAP* function is used to run UMAP on the dataset and results are stored as a list labeled "UMAP" in the "assayData" slot labeled "Seurat" in the ExpressionSet object.
+	<ul><li>
+		UMAP results will reflect the decision to use or not use one of the specified batch correction methods
+	</li>
+	<li>
+		According to the number of iterations specified in the "scpost_parameters.csv" file, results are subsequently stored as "Iteration_1", "Iteration_2", ...
+	</li>
+	<li>
+		According to the number of iterations specified in the "scpost_parameters.csv" file, results are saved in a subdirectory named "scpost_analysis" in *dir_output* in the RDS format as "UMAP_Iteration_1.rds", "UMAP_Iteration_2.rds", ...
+	</li>
 
-* Sample-cluster composition assessment methods with built-in statistical methods for univariate or multivariate analysis of cluster-associations with variable(s) of interest are a work in progress ...
 
-* Pseudobulk differential expression functionalities, involving the use of the ["DESeq2" R package](https://bioconductor.org/packages/release/bioc/html/DESeq2.html) are a work in progress...
+<li>
+	Sample-cluster composition assessment methods with built-in statistical methods for univariate or multivariate analysis of cluster-associations with variable(s) of interest are a work in progress ...
+</li>
 
-* Functional annotation functionalities, involving the use of gene sets from [the Molecular Signatures Database (MSigDB)](https://www.gsea-msigdb.org/gsea/msigdb/), [Gene Ontology (GO)](https://geneontology.org), and [the Kyoto Encyclopedia of Genes and Genomes (KEGG)](https://www.genome.jp/kegg/) with the [Fast Gene Set Enrichment analysis (fgsea) R package](https://bioconductor.org/packages/release/bioc/html/fgsea.html) and the ["enrichR" R package](https://cran.r-project.org/web/packages/enrichR/index.html) are a work in progress ...
 
-* Save ExpressionSet RDS object in *dir_output*
+<li>
+	Pseudobulk differential expression functionalities, involving the use of the ["DESeq2" R package](https://bioconductor.org/packages/release/bioc/html/DESeq2.html) are a work in progress...
+</li>
+
+
+<li>
+	Functional annotation functionalities, involving the use of gene sets from [the Molecular Signatures Database (MSigDB)](https://www.gsea-msigdb.org/gsea/msigdb/), [Gene Ontology (GO)](https://geneontology.org), and [the Kyoto Encyclopedia of Genes and Genomes (KEGG)](https://www.genome.jp/kegg/) with the [Fast Gene Set Enrichment analysis (fgsea) R package](https://bioconductor.org/packages/release/bioc/html/fgsea.html) and the ["enrichR" R package](https://cran.r-project.org/web/packages/enrichR/index.html) are a work in progress ...
+</li>
+
+
+<details>
+	<summary>Additional features</summary>
+<ul><li>
+	Store parameters specified in the scpost_parameters.csv file in a list labeled "Parameters" in the "assayData" slot labeled "Params" in the ExpressionSet object
+</li>
+
+<li>
+	Save ExpressionSet RDS object in *dir_output*
+</li>
+</ul>
+</details>
 
 ***
