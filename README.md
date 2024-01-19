@@ -75,9 +75,8 @@ seurat.obj <- scpost::scpost_seurat_init(
 	<summary>
 	Data integration intended to correct for technical batch effects for downstream clustering & dimensionality reduction, based on a selected "batch" variable of interest using one of the following methods:
 	<br>
-	<br>
-	<li>["Harmony" R package](https://github.com/immunogenomics/harmony)</li>
-	<li>[Seurat's "RPCA" method](https://satijalab.org/seurat/articles/integration_rpca.html)</li>
+		<li>["Harmony" R package](https://github.com/immunogenomics/harmony)</li>
+		<li>[Seurat's "RPCA" method](https://satijalab.org/seurat/articles/integration_rpca.html)</li>
 	</summary>
 <pre>
 # Select batch metadata according to metadata variable of interest
