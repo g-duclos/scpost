@@ -52,8 +52,7 @@ Core functions include:
 
 <details>
 	<summary>
-	A single command to add GEX counts data to a Seurat object, then perform standard normalization (natural log counts per ten thousand), select the top 2000 highly variable genes, scale and center the normalized data, and perform principal component analysis (PCA).
-	</summary>
+	A single command to add GEX counts data to a Seurat object, then perform standard normalization (natural log counts per ten thousand), select the top 2000 highly variable genes, scale and center the normalized data, and perform principal component analysis (PCA).</summary>
 <pre>
 # Select high quality cells
 cells <- dataset$ID[which(dataset$Cell_Filter == "Cell")]
@@ -75,6 +74,7 @@ seurat.obj <- scpost::scpost_seurat_init(
 <details>
 	<summary>
 	Data integration intended to correct for technical batch effects for downstream clustering & dimensionality reduction, based on a selected "batch" variable of interest using one of the following methods:
+	<br>
 	<li>["Harmony" R package](https://github.com/immunogenomics/harmony)</li>
 	<li>[Seurat's "RPCA" method](https://satijalab.org/seurat/articles/integration_rpca.html)</li>
 	</summary>
