@@ -48,7 +48,7 @@ library(Biobase)
 dataset <- scpost::template_scpost(dir_output=dir_output)
 ```
 
-**Core functions include:**
+**Core functions:**
 
 <details>
 	<summary>
@@ -115,8 +115,10 @@ seurat.obj <- scpost::scpost_seurat_cluster(
 </details>
 
 
-<li>
+<details>
+	<summary>
 	The Seurat *RunTSNE* function is used to run t-SNE on the dataset and results are stored as a list labeled "tSNE" in the "assayData" slot labeled "Seurat" in the ExpressionSet object.
+	</summary>
 	<ul><li>
 		tSNE results will reflect the decision to use or not use one of the specified batch correction methods
 	</li>
@@ -126,7 +128,8 @@ seurat.obj <- scpost::scpost_seurat_cluster(
 	<li>
 		According to the number of iterations specified in the "scpost_parameters.csv" file, results are saved in a subdirectory named "scpost_analysis" in *dir_output* in the RDS format as "tSNE_Iteration_1.rds", "tSNE_Iteration_2.rds", ...
 	</li>
-</ul>
+	</ul>
+</details>
 
 
 <li>
