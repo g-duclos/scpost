@@ -146,16 +146,19 @@ seurat.obj <- scpost::scpost_seurat_cluster(
 <li>
 	Sample-cluster composition assessment methods with built-in statistical methods for univariate or multivariate analysis of cluster-associations with variable(s) of interest are a work in progress ...
 </li>
+<br>
 
 
 <li>
 	Pseudobulk differential expression functionalities, involving the use of the ["DESeq2" R package](https://bioconductor.org/packages/release/bioc/html/DESeq2.html) are a work in progress...
 </li>
+<br>
 
 
 <li>
 	Functional annotation functionalities, involving the use of gene sets from [the Molecular Signatures Database (MSigDB)](https://www.gsea-msigdb.org/gsea/msigdb/), [Gene Ontology (GO)](https://geneontology.org), and [the Kyoto Encyclopedia of Genes and Genomes (KEGG)](https://www.genome.jp/kegg/) with the [Fast Gene Set Enrichment analysis (fgsea) R package](https://bioconductor.org/packages/release/bioc/html/fgsea.html) and the ["enrichR" R package](https://cran.r-project.org/web/packages/enrichR/index.html) are a work in progress ...
 </li>
+<br>
 
 
 <details>
