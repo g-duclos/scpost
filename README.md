@@ -126,6 +126,7 @@ seurat.obj <- scpost::scpost_seurat_cluster(
 	<li>
 		According to the number of iterations specified in the "scpost_parameters.csv" file, results are saved in a subdirectory named "scpost_analysis" in *dir_output* in the RDS format as "tSNE_Iteration_1.rds", "tSNE_Iteration_2.rds", ...
 	</li>
+</ul>
 
 
 <li>
@@ -139,6 +140,7 @@ seurat.obj <- scpost::scpost_seurat_cluster(
 	<li>
 		According to the number of iterations specified in the "scpost_parameters.csv" file, results are saved in a subdirectory named "scpost_analysis" in *dir_output* in the RDS format as "UMAP_Iteration_1.rds", "UMAP_Iteration_2.rds", ...
 	</li>
+</ul>
 
 
 <li>
