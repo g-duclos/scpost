@@ -1,16 +1,16 @@
 Package: scpost
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: R package containing a suite of functions for single-cell RNA-Seq data post-processing, involving unsupervised clustering, dimensionality reduction, batch correction, sample-cluster composition analysis, pseudobulk differential expression, and functional annotation
+Version: 1.0
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
+    person("Grant", "Duclos", , "grant.duclos@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Description: This R package enables the post-processing of single-cell RNA-Seq data, involving unsupervised clustering, dimensionality reduction, batch correction, sample-cluster composition analysis, pseudobulk differential expression, and functional annotation.
+License: use_gpl3_license()
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.0
-Depends: 
-    Biobase
 Imports: 
+    Biobase,
     devtools
+Depends: 
+    R (>= 4.0.0)

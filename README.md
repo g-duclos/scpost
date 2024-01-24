@@ -9,14 +9,9 @@ An R package for post-processing single-cell RNA-Seq data involving unsupervised
 
 ## Installation
 
-Clone the 'scpost' repository
+The **scpost** R package can be installed from Github using devtools:
 ```
-git clone https://github.com/g-duclos/scpost.git
-```
-
-Run R and install the package
-```
-install.packages("scpost", repos=NULL, type="source")
+devtools::install_github("g-duclos/scpost")
 ```
 
 ***
@@ -45,6 +40,7 @@ Template function to perform unsupervised clustering, dimensionality reduction, 
 
 ```
 library(Biobase)
+
 dataset <- scpost::template_scpost(dir_output=dir_output)
 ```
 
