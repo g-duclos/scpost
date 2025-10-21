@@ -9,8 +9,11 @@ License: use_gpl3_license()
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.0
-Imports: 
+Imports:
     Biobase,
-    devtools
+    devtools,
+    S4Vectors,
+    SummarizedExperiment,
+    SingleCellExperiment
 Depends: 
     R (>= 4.0.0)
