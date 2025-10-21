@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>/404.html</loc>
+  </url>
+  <url>
+    <loc>/LICENSE-text.html</loc>
+  </url>
+  <url>
+    <loc>/articles/index.html</loc>
+  </url>
+  <url>
+    <loc>/articles/vignette_scpost_usage.html</loc>
+  </url>
+  <url>
+    <loc>/authors.html</loc>
+  </url>
+  <url>
+    <loc>/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scpost_batch_correction.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scpost_seurat_cluster.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scpost_seurat_init.html</loc>
+  </url>
+  <url>
+    <loc>/reference/template_scpost.html</loc>
+  </url>
+</urlset>
