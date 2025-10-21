@@ -316,22 +316,18 @@ seurat.obj <- scpost::scpost_seurat_cluster(
 
 ## Data Flow: scprep → scpost
 
-**scpost** seamlessly integrates with **scprep** output, supporting all three object types:
+**scpost** seamlessly integrates with **scprep** output. Example workflow using Seurat objects:
 
 ```r
-# Workflow 1: ExpressionSet (Original)
-scprep::template_scprep(dir_output="/path")  # output_type="eset"
-scpost::template_scpost(dir_output="/path")  # Reads ExpressionSet.rds
+# Step 1: Aggregate data with scprep
+scprep::template_scprep(dir_input="/path/to/cellranger", dir_output="/path/to/output")
+# Creates: /path/to/output/seurat.rds
 
-# Workflow 2: Seurat (New)
-scprep::template_scprep(dir_output="/path")  # output_type="seurat"
-scpost::template_scpost(dir_output="/path")  # Reads seurat.rds
-
-# Workflow 3: SingleCellExperiment (New)
-scprep::template_scprep(dir_output="/path")  # output_type="sce"
-scpost::template_scpost(dir_output="/path")  # Reads sce.rds
+# Step 2: Post-process with scpost
+scpost::template_scpost(dir_output="/path/to/output")
+# Reads: seurat.rds → Processes → Saves: seurat.rds + analysis results
 ```
 
-**Note:** The `output_type` parameter is specified in `scprep_parameters.csv` when running **scprep**. **scpost** automatically detects and processes the corresponding object type.
+**Note:** The same workflow applies to **ExpressionSet** (`ExpressionSet.rds`) and **SingleCellExperiment** (`sce.rds`) objects. The `output_type` parameter is specified in `scprep_parameters.csv` when running **scprep**, and **scpost** automatically detects and processes the corresponding object type.
 
 ***
