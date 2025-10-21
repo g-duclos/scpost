@@ -1,0 +1,563 @@
+---
+title: "scpost: Post-Processing Guide for Single-cell Data"
+author: "scpost package"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: show
+vignette: >
+  %\VignetteIndexEntry{scpost Post-Processing Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
+)
+
+# Memory management
+options(future.globals.maxSize = 2 * 1024^3)  # 2GB limit
+```
+
+
+# Introduction
+
+The `scpost` package provides post-processing workflows for single-cell RNA-seq data. The package supports processing of data from three popular single-cell data object types:
+
+- **ExpressionSet** (Biobase) - Classic Bioconductor format
+- **Seurat** - Most popular single-cell analysis format
+- **SingleCellExperiment** - Modern Bioconductor standard for single-cell data
+
+This vignette demonstrates how to process data from each object type (typically output from the **[scprep](https://github.com/g-duclos/scprep)** package), perform clustering and dimensionality reduction, and explore the results stored in each object type.
+
+
+***
+
+# Example Data Setup
+
+***
+
+For this example, we'll use data processed by `scprep`. We'll demonstrate how to apply `scpost` workflows to each object type and show where results are stored.
+
+```{r example_data}
+
+# First let's load the required packages
+library(scpost)
+library(scprep)
+library(Biobase)
+library(Seurat)
+library(SingleCellExperiment)
+library(Matrix)
+
+# For this vignette, we will load data from 2 example samples from the 'scdata' package and store in a list (normally you would load data from directories where the 10X data is stored)
+library(scdata)
+# Load the PBMC 3p and 5p example sample data
+data(PBMC_3p_10K, package="scdata")
+data(PBMC_5p_10K, package="scdata")
+
+# Store in example_data list - we will only use a subset of the data to keep it lightweight
+example_data <- list(
+  Sample_1 = PBMC_3p_10K[, 1:500],
+  Sample_2 = PBMC_5p_10K[, 1:500]
+)
+
+# Clean up the original loaded objects to free memory
+rm(PBMC_3p_10K, PBMC_5p_10K)
+gc()  # Force garbage collection
+
+# We will create some fake sample paths for the purpose of this example
+sample_paths <- c(
+  "/path/to/Sample_1",
+  "/path/to/Sample_2"
+)
+
+# Example annotation data (modify based on your experimental design)
+annotation <- data.frame(
+  Sample_ID = c("Sample_1", "Sample_2"),
+  Index = c("SI-GA-A1", "SI-GA-B1"),
+  Sample_Project = c("scRNA_10X_Project", "scRNA_10X_Project"),
+  Reference = c("refdata-cellranger-GRCh38-3.0.0", "refdata-cellranger-GRCh38-3.0.0"),
+  Tissue = c("Blood", "Blood"),
+  Type = c("PBMC", "PBMC"),
+  Batch = c("Batch_A", "Batch_B"),  # For batch correction demonstration
+  stringsAsFactors = FALSE
+)
+
+print("Sample annotation:")
+print(annotation)
+```
+
+# Data Processing and Post-Processing
+
+The `scpost` package provides two main approaches for post-processing single-cell data:
+
+1. **Direct function calls** using core functions (`scpost_seurat_init()`, `scpost_seurat_cluster()`, etc.)
+2. **Template workflow** using `template_scpost()` with parameter files (not demonstrated in this vignette)
+
+## Direct Function Approach
+
+The core functions allow you to process data step-by-step with full control over parameters.
+
+
+***
+
+# ExpressionSet
+
+***
+
+## Build ExpressionSet:
+First, run the 'scprep_build' function to read the data and create an ExpressionSet object. Then we'll add cell filtering which is required for scpost.
+
+```{r build_eset, eval=TRUE, warning = FALSE, message=FALSE}
+# Read data and create ExpressionSet object (default)
+eset <- scprep::scprep_build(
+  sample_paths = sample_paths,
+  input_data = example_data, # normally, you would set this to FALSE to read directly from sample_paths
+  annotation = annotation,
+  file_type = "h5",
+  vdj = FALSE,
+  cite = FALSE,
+  atac = FALSE,
+  output_type = "eset",
+  verbose = FALSE
+)
+
+# Add cell filtering (required for scpost)
+cell_filter_assignment <- scprep::scprep_cell_filter_multi(
+  dataset = eset,
+  min_umi = 500,
+  min_gene = 200,
+  max_mito = 0.2
+)
+
+eset$Cell_Filter <- as.factor(cell_filter_assignment)
+
+# Add simple gene filter for this example (mark all genes as "Expressed")
+Biobase::fData(eset)$Gene_Filter <- as.factor(rep("Expressed", nrow(eset)))
+Biobase::fData(eset)$Ensembl <- rownames(eset)
+
+print(eset)
+print(table(eset$Cell_Filter))
+```
+
+## Process ExpressionSet with scpost:
+Run the core scpost functions to perform clustering and dimensionality reduction.
+
+```{r process_eset, eval=TRUE, warning = FALSE, message=FALSE}
+# Select high quality cells
+cells <- eset$ID[which(eset$Cell_Filter == "Cell")]
+cat("Selected", length(cells), "high quality cells\n")
+
+# Select genes
+genes <- Biobase::fData(eset)$Ensembl[which(Biobase::fData(eset)$Gene_Filter == "Expressed")]
+cat("Selected", length(genes), "genes\n")
+
+# Initialize Seurat workflow (normalize, scale, PCA)
+seurat.obj <- scpost::scpost_seurat_init(
+  counts = Biobase::exprs(eset)[genes, cells],
+  pc_max = 20,
+  verbose = FALSE
+)
+
+cat("Seurat object created with", ncol(seurat.obj), "cells and", nrow(seurat.obj), "genes\n")
+
+# Perform clustering at resolution 0.5
+seurat.obj <- scpost::scpost_seurat_cluster(
+  seurat.obj = seurat.obj,
+  pc_max = 20,
+  resolution = 0.5,
+  reduction = "pca",
+  seurat_return = TRUE,
+  verbose = FALSE
+)
+
+# Get cluster assignments
+clusters <- as.numeric(Seurat::Idents(seurat.obj))
+names(clusters) <- colnames(seurat.obj)
+cat("Found", length(unique(clusters)), "clusters at resolution 0.5\n")
+
+# Store clustering results in ExpressionSet
+not.clusters <- rep(NA, length(setdiff(eset$ID, names(clusters))))
+names(not.clusters) <- setdiff(eset$ID, names(clusters))
+seurat.clusters.all <- c(clusters, not.clusters)[eset$ID]
+eset$Seurat_Clusters_Res_0.5 <- as.factor(seurat.clusters.all)
+
+# Run UMAP
+seurat.obj <- Seurat::RunUMAP(
+  object = seurat.obj,
+  reduction = "pca",
+  dims = 1:20,
+  verbose = FALSE
+)
+
+# Store UMAP in ExpressionSet assayData
+if (!exists("Seurat", where = Biobase::assayData(eset))) {
+  Biobase::assayData(eset)$Seurat <- list()
+}
+Biobase::assayData(eset)$Seurat[["UMAP"]] <- list()
+Biobase::assayData(eset)$Seurat[["UMAP"]][["Iteration_1"]] <- seurat.obj@reductions$umap@cell.embeddings
+
+cat("UMAP completed\n")
+```
+
+## Explore ExpressionSet Results
+Now let's explore the structure of the ExpressionSet object to see where scpost results are stored.
+
+```{r explore_eset, eval=TRUE, warning = FALSE, message=FALSE}
+# Basic object information
+cat("ExpressionSet dimensions:", dim(eset), "\n")
+
+# Check clustering results in metadata
+cell_metadata <- Biobase::pData(eset)
+cat("Cell metadata columns:\n")
+print(colnames(cell_metadata))
+
+print("Cluster distribution:")
+print(table(eset$Seurat_Clusters_Res_0.5, useNA = "ifany"))
+
+# Check UMAP results in assayData
+cat("\nAvailable assayData slots:\n")
+print(names(Biobase::assayData(eset)))
+
+if ("Seurat" %in% names(Biobase::assayData(eset))) {
+  cat("\nAvailable Seurat analysis results:\n")
+  print(names(Biobase::assayData(eset)$Seurat))
+
+  if ("UMAP" %in% names(Biobase::assayData(eset)$Seurat)) {
+    cat("\nUMAP iterations:\n")
+    print(names(Biobase::assayData(eset)$Seurat$UMAP))
+
+    umap_coords <- Biobase::assayData(eset)$Seurat$UMAP$Iteration_1
+    cat("\nUMAP dimensions:", dim(umap_coords), "\n")
+    print("First few UMAP coordinates:")
+    print(head(umap_coords, 3))
+  }
+}
+```
+
+```{r remove_eset, echo=FALSE}
+rm(eset, seurat.obj)
+gc()  # Force garbage collection
+```
+
+
+***
+
+# Seurat
+
+***
+
+## Build Seurat Object:
+Run the 'scprep_build' function to read the data and create a Seurat object, then add cell filtering.
+
+```{r build_seurat, eval=TRUE, warning = FALSE, message=FALSE}
+# Read data and create Seurat object
+seurat_obj <- scprep::scprep_build(
+  sample_paths = sample_paths,
+  input_data = example_data, # normally, you would set this to FALSE to read directly from sample_paths
+  annotation = annotation,
+  file_type = "h5",
+  vdj = FALSE,
+  cite = FALSE,
+  atac = FALSE,
+  output_type = "seurat",
+  verbose = FALSE
+)
+
+# Add cell filtering (required for scpost)
+cell_filter_assignment <- scprep::scprep_cell_filter_multi(
+  dataset = seurat_obj,
+  min_umi = 500,
+  min_gene = 200,
+  max_mito = 0.2
+)
+
+seurat_obj@meta.data$Cell_Filter <- as.factor(cell_filter_assignment)
+
+print(seurat_obj)
+print(table(seurat_obj@meta.data$Cell_Filter))
+```
+
+## Process Seurat Object with scpost:
+When the input is already a Seurat object, scpost processes it directly without creating a new object.
+
+```{r process_seurat, eval=TRUE, warning = FALSE, message=FALSE}
+# Select high quality cells
+cells <- rownames(seurat_obj@meta.data)[which(seurat_obj@meta.data$Cell_Filter == "Cell")]
+cat("Selected", length(cells), "high quality cells\n")
+
+# Subset Seurat object to selected cells
+seurat_obj <- subset(seurat_obj, cells = cells)
+
+# Process with Seurat workflow (normalize, scale, PCA)
+cat("Normalizing data...\n")
+seurat_obj <- Seurat::NormalizeData(seurat_obj, verbose = FALSE)
+
+cat("Finding variable features...\n")
+seurat_obj <- Seurat::FindVariableFeatures(seurat_obj, verbose = FALSE)
+
+cat("Scaling data...\n")
+seurat_obj <- Seurat::ScaleData(seurat_obj, verbose = FALSE)
+
+cat("Running PCA...\n")
+seurat_obj <- Seurat::RunPCA(seurat_obj, npcs = 20, verbose = FALSE)
+
+# Perform clustering at resolution 0.5
+seurat_obj <- scpost::scpost_seurat_cluster(
+  seurat.obj = seurat_obj,
+  pc_max = 20,
+  resolution = 0.5,
+  reduction = "pca",
+  seurat_return = TRUE,
+  verbose = FALSE
+)
+
+cat("Found", length(unique(Seurat::Idents(seurat_obj))), "clusters at resolution 0.5\n")
+
+# Run UMAP
+seurat_obj <- Seurat::RunUMAP(
+  object = seurat_obj,
+  reduction = "pca",
+  dims = 1:20,
+  verbose = FALSE
+)
+
+# Store UMAP in misc slot (for consistency with template workflow)
+if (is.null(seurat_obj@misc$UMAP_iterations)) {
+  seurat_obj@misc$UMAP_iterations <- list()
+}
+seurat_obj@misc$UMAP_iterations$Iteration_1 <- seurat_obj@reductions$umap@cell.embeddings
+
+cat("UMAP completed\n")
+```
+
+## Explore Seurat Object Results
+Now let's explore the structure of the Seurat object to see where scpost results are stored.
+
+```{r explore_seurat, eval=TRUE, warning = FALSE, message=FALSE}
+# Basic object information
+cat("Seurat object dimensions:", dim(seurat_obj), "\n")
+
+# Check clustering results in metadata
+cell_metadata <- seurat_obj@meta.data
+cat("\nCell metadata columns:\n")
+print(colnames(cell_metadata))
+
+print("\nCluster distribution:")
+print(table(Seurat::Idents(seurat_obj)))
+
+# Check reductions
+cat("\nAvailable reductions:\n")
+print(names(seurat_obj@reductions))
+
+# PCA results
+if ("pca" %in% names(seurat_obj@reductions)) {
+  pca_coords <- seurat_obj@reductions$pca@cell.embeddings
+  cat("\nPCA dimensions:", dim(pca_coords), "\n")
+  print("First few PCA coordinates:")
+  print(head(pca_coords[, 1:3], 3))
+}
+
+# UMAP results
+if ("umap" %in% names(seurat_obj@reductions)) {
+  umap_coords <- seurat_obj@reductions$umap@cell.embeddings
+  cat("\nUMAP dimensions:", dim(umap_coords), "\n")
+  print("First few UMAP coordinates:")
+  print(head(umap_coords, 3))
+}
+
+# Check misc slot
+if (!is.null(seurat_obj@misc$UMAP_iterations)) {
+  cat("\nUMAP iterations in misc slot:\n")
+  print(names(seurat_obj@misc$UMAP_iterations))
+}
+```
+
+```{r remove_seurat, echo=FALSE}
+rm(seurat_obj)
+gc()  # Force garbage collection
+```
+
+
+***
+
+# SingleCellExperiment
+
+***
+
+## Build SingleCellExperiment object:
+Run the 'scprep_build' function to read the data and create a SingleCellExperiment object, then add cell filtering.
+
+```{r sce_build, eval=TRUE, warning = FALSE, message=FALSE}
+# Read data and create SingleCellExperiment object
+sce_obj <- scprep::scprep_build(
+  sample_paths = sample_paths,
+  input_data = example_data, # normally, you would set this to FALSE to read directly from sample_paths
+  annotation = annotation,
+  file_type = "h5",
+  vdj = FALSE,
+  cite = FALSE,
+  atac = FALSE,
+  output_type = "sce",
+  verbose = FALSE
+)
+
+# Add cell filtering (required for scpost)
+cell_filter_assignment <- scprep::scprep_cell_filter_multi(
+  dataset = sce_obj,
+  min_umi = 500,
+  min_gene = 200,
+  max_mito = 0.2
+)
+
+SummarizedExperiment::colData(sce_obj)$Cell_Filter <- as.factor(cell_filter_assignment)
+
+print(sce_obj)
+print(table(SummarizedExperiment::colData(sce_obj)$Cell_Filter))
+```
+
+## Process SingleCellExperiment with scpost:
+Run the core scpost functions to perform clustering and dimensionality reduction.
+
+```{r process_sce, eval=TRUE, warning = FALSE, message=FALSE}
+# Select high quality cells
+cells <- rownames(SummarizedExperiment::colData(sce_obj))[which(SummarizedExperiment::colData(sce_obj)$Cell_Filter == "Cell")]
+cat("Selected", length(cells), "high quality cells\n")
+
+# Get counts for selected cells
+genes <- rownames(sce_obj)
+counts_matrix <- SummarizedExperiment::assay(sce_obj, "counts")[genes, cells]
+
+# Initialize Seurat workflow (normalize, scale, PCA)
+seurat.obj <- scpost::scpost_seurat_init(
+  counts = counts_matrix,
+  pc_max = 20,
+  verbose = FALSE
+)
+
+cat("Seurat object created with", ncol(seurat.obj), "cells and", nrow(seurat.obj), "genes\n")
+
+# Perform clustering at resolution 0.5
+seurat.obj <- scpost::scpost_seurat_cluster(
+  seurat.obj = seurat.obj,
+  pc_max = 20,
+  resolution = 0.5,
+  reduction = "pca",
+  seurat_return = TRUE,
+  verbose = FALSE
+)
+
+# Get cluster assignments
+clusters <- as.numeric(Seurat::Idents(seurat.obj))
+names(clusters) <- colnames(seurat.obj)
+cat("Found", length(unique(clusters)), "clusters at resolution 0.5\n")
+
+# Store clustering results in SingleCellExperiment
+all_cell_ids <- rownames(SummarizedExperiment::colData(sce_obj))
+not.clusters <- rep(NA, length(setdiff(all_cell_ids, names(clusters))))
+names(not.clusters) <- setdiff(all_cell_ids, names(clusters))
+seurat.clusters.all <- c(clusters, not.clusters)[all_cell_ids]
+SummarizedExperiment::colData(sce_obj)$Seurat_Clusters_Res_0.5 <- as.factor(seurat.clusters.all)
+
+# Run UMAP
+seurat.obj <- Seurat::RunUMAP(
+  object = seurat.obj,
+  reduction = "pca",
+  dims = 1:20,
+  verbose = FALSE
+)
+
+# Store UMAP in reducedDims
+SingleCellExperiment::reducedDim(sce_obj, "UMAP_Iteration_1") <- seurat.obj@reductions$umap@cell.embeddings
+
+# Also store PCA
+SingleCellExperiment::reducedDim(sce_obj, "PCA") <- seurat.obj@reductions$pca@cell.embeddings
+
+cat("UMAP completed\n")
+```
+
+## Explore SingleCellExperiment Results
+Now let's explore the structure of the SingleCellExperiment object to see where scpost results are stored.
+
+```{r explore_sce, eval=TRUE, warning = FALSE, message=FALSE}
+# Basic object information
+cat("SingleCellExperiment dimensions:", dim(sce_obj), "\n")
+
+# Check clustering results in metadata
+cell_metadata <- SummarizedExperiment::colData(sce_obj)
+cat("\nCell metadata columns:\n")
+print(colnames(cell_metadata))
+
+print("\nCluster distribution:")
+print(table(SummarizedExperiment::colData(sce_obj)$Seurat_Clusters_Res_0.5, useNA = "ifany"))
+
+# Check available reduced dimensions
+cat("\nAvailable reduced dimensions:\n")
+print(SingleCellExperiment::reducedDimNames(sce_obj))
+
+# PCA results
+if ("PCA" %in% SingleCellExperiment::reducedDimNames(sce_obj)) {
+  pca_coords <- SingleCellExperiment::reducedDim(sce_obj, "PCA")
+  cat("\nPCA dimensions:", dim(pca_coords), "\n")
+  print("First few PCA coordinates:")
+  print(head(pca_coords[, 1:3], 3))
+}
+
+# UMAP results
+if ("UMAP_Iteration_1" %in% SingleCellExperiment::reducedDimNames(sce_obj)) {
+  umap_coords <- SingleCellExperiment::reducedDim(sce_obj, "UMAP_Iteration_1")
+  cat("\nUMAP dimensions:", dim(umap_coords), "\n")
+  print("First few UMAP coordinates:")
+  print(head(umap_coords, 3))
+}
+```
+
+```{r remove_sce, echo=FALSE}
+rm(sce_obj, seurat.obj)
+gc()  # Force garbage collection
+```
+
+
+
+
+***
+
+# Summary
+
+***
+
+
+## Summary: Data Location by Object Type {-}
+
+| Data Type                | ExpressionSet                | Seurat                             | SingleCellExperiment        |
+|:-------------------------|:-----------------------------|:-----------------------------------|:----------------------------|
+| **Counts Matrix**        | `exprs(obj)`                 | `GetAssayData(obj, slot="counts")` | `counts(obj)`               |
+| **Cell Metadata**        | `pData(obj)`                 | `obj@meta.data`                    | `colData(obj)`              |
+| **Cluster Assignments**  | `pData(obj)$Seurat_Clusters_Res_X` | `obj@meta.data$Seurat_Clusters_Res_X` | `colData(obj)$Seurat_Clusters_Res_X` |
+| **PCA Embeddings**       | `assayData(obj)$Seurat$PCA`  | `obj@reductions$pca`               | `reducedDim(obj, "PCA")`    |
+| **UMAP Embeddings**      | `assayData(obj)$Seurat$UMAP$Iteration_X` | `obj@reductions$umap` or `obj@misc$UMAP_iterations` | `reducedDim(obj, "UMAP_Iteration_X")` |
+| **Parameters**           | `assayData(obj)$Params$scpost_Parameters` | `obj@misc$scpost_Parameters` | `metadata(obj)$scpost_Parameters` |
+
+
+# Conclusion {-}
+
+The `scpost` package provides post-processing workflows for single-cell RNA-seq data and works seamlessly with objects created by the **[scprep](https://github.com/g-duclos/scprep)** package. Each object type has its own conventions for storing results:
+
+- **ExpressionSet**: Results stored in `assayData$Seurat` and `pData()` slots
+- **Seurat**: Results stored in `@reductions`, `@misc`, and `@meta.data` slots
+- **SingleCellExperiment**: Results stored in `reducedDims()`, `metadata()`, and `colData()` slots
+
+All three formats store the same information - choose the object type that works best for your downstream analysis workflow. The `scpost` package supports:
+
+- **Clustering** at multiple resolutions using Seurat's graph-based methods
+- **Dimensionality reduction** with PCA, UMAP, and tSNE
+- **Batch correction** using Harmony or CCA/RPCA methods
+- **Flexible input/output** with automatic conversion between object types
